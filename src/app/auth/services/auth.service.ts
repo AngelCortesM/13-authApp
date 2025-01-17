@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environments';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, map, Observable, of,  throwError } from 'rxjs';
 import {
   AuthStatus,
   CheckTokenResponse,
@@ -19,12 +19,16 @@ export class AuthService {
   private readonly _authStatus = signal<AuthStatus>(AuthStatus.cheking);
   public readonly currentUser = computed(() => this._currentUser());
   public readonly authStatus = computed(() => this._authStatus());
-  constructor() {}
+  constructor() {
+    this.checkAuthStatus().subscribe();
+  }
 
   private setAuthentication(user: User, token: string): boolean {
     this._currentUser.set(user);
     this._authStatus.set(AuthStatus.authenticated);
-    localStorage.setItem('token', token);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('token', token);
+    }
     return true;
   }
 
@@ -37,10 +41,19 @@ export class AuthService {
     );
   }
   checkAuthStatus(): Observable<boolean> {
+    if (typeof localStorage === 'undefined') {
+      console.warn('localStorage is not available');
+      this._authStatus.set(AuthStatus.notAuthenticated);
+      return of(false);
+    }
+
     const url = `${this.baseUrl}/auth/check-token`;
     const token = localStorage.getItem('token');
 
-    if (!token) return of(false);
+    if (!token) {
+      this._authStatus.set(AuthStatus.notAuthenticated);
+      return of(false);
+    }
 
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<CheckTokenResponse>(url, { headers }).pipe(
