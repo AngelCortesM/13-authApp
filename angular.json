@@ -39,8 +39,9 @@
             "scripts": [],
             "server": "src/main.server.ts",
             "outputMode": "server",
+            "prerender": false,
             "ssr": {
-              "entry": "src/server.ts"
+              "entry": "src/main.server.ts"
             }
           },
           "configurations": {
@@ -62,7 +63,9 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "prerender": false
+
             }
           },
           "defaultConfiguration": "production"
