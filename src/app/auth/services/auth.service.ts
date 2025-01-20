@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environments';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, Observable, of,  throwError } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import {
   AuthStatus,
   CheckTokenResponse,
@@ -40,9 +40,9 @@ export class AuthService {
       catchError((err) => throwError(() => err.error.message))
     );
   }
+
   checkAuthStatus(): Observable<boolean> {
     if (typeof localStorage === 'undefined') {
-      console.warn('localStorage is not available');
       this._authStatus.set(AuthStatus.notAuthenticated);
       return of(false);
     }
@@ -51,7 +51,7 @@ export class AuthService {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      this._authStatus.set(AuthStatus.notAuthenticated);
+      this.logout();
       return of(false);
     }
 
@@ -63,5 +63,13 @@ export class AuthService {
         return of(false);
       })
     );
+  }
+
+  logout() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('token');
+    }
+    this._currentUser.set(null);
+    this._authStatus.set(AuthStatus.notAuthenticated);
   }
 }
