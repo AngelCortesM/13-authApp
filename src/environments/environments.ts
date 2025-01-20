@@ -2,5 +2,5 @@
 
 
 export const environment = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'https://nest-backen-angular.up.railway.app',
 }
